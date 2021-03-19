@@ -22,6 +22,9 @@ repositories {
 dependencies {
     implementation 'net.dv8tion:JDA:4.2.0_222'
 
+    // jOOQ - https://www.jooq.org/
+    compile 'org.jooq:jooq:3.14.8'
+
     // https://mvnrepository.com/artifact/org.json/json
     compile group: 'org.json', name: 'json', version: '20201115'
 
