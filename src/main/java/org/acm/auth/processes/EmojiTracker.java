@@ -1,11 +1,10 @@
 package org.acm.auth.processes;
 
 
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageReaction;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveEvent;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 // Custom emoji format: <{emoji.type}:{emoji.name}:{emoji.id}>
 // {emoji.type}: Animated: "a", Not Animated: ""
@@ -23,55 +22,30 @@ public class EmojiTracker {
     public static void add(GuildMessageReactionAddEvent event) {
 
         System.out.println("Reaction Added!");
-        String reaction = event.getReaction().toString();
+        MessageReaction.ReactionEmote reaction = event.getReactionEmote();
         Emoji emoji = new Emoji(reaction);
-
 
     }
 
     public static void remove(GuildMessageReactionRemoveEvent event) {
 
-        System.out.println("Reaction Added!");
-        String reaction = event.getReaction().toString();
+        System.out.println("Reaction Removed!");
+        MessageReaction.ReactionEmote reaction = event.getReactionEmote();
         Emoji emoji = new Emoji(reaction);
 
     }
 
     private static class Emoji {
-        private final String reaction;
-        public String id;
-        public String name;
-        public String type = ""; // Currently there is no way to detect it, but it doesn't matter much
-        public String formatted = "";
+        private final MessageReaction.ReactionEmote reaction;
+        public String raw = "";
 
-        Emoji(String reaction) {
+        Emoji(MessageReaction.ReactionEmote reaction) {
             this.reaction = reaction;
-
-            if (isCustom()) {
-                this.id = find(reaction, "(?<=\\()([0-9]*\\n?)(?=\\)\\))");  // Regex: find numbers between "(" and "))"
-                this.name = find(reaction, "(?<=RE:)(.*\\n?)(?=\\()");       // Regex: find anything between "RE:" and "("
-                this.formatted = String.format("<%s:%s:%s>", type, name, id);
-            } else {
-                this.name = null;
-                this.id = find(reaction, "(?<=RE:U\\+)(.*\\n?)(?=\\))");     // Regex: find anything between "RE:" and ")"
-                int ch = Integer.decode(formatted);
-                this.formatted = String.format("\u1dca%s", id);
+            if (reaction.isEmoji()){
+                this.raw = reaction.getEmoji();
+            }else{
+                this.raw = reaction.getEmote().getAsMention();
             }
-        }
-
-        public boolean isCustom() {
-            //Custom Emoji don't have the "+" symbol
-            return !reaction.contains("U+");
-        }
-
-
-        private String find(String input, String regex) {
-            Pattern pattern = Pattern.compile(regex);
-            Matcher matcher = pattern.matcher(input);
-            if (matcher.find()) {
-                return matcher.group(0);
-            }
-            return null;
         }
     }
 }
